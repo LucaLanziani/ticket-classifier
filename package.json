@@ -1,0 +1,13 @@
+{
+  "name": "ticket-classifier",
+  "version": "1.0.0",
+  "description": "Ticket classification app with LLM",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "openai": "^4.20.0"
+  }
+}
