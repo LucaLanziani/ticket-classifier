@@ -86,21 +86,37 @@ submitBtn.addEventListener('click', async () => {
     const description = ticketInput.value.trim();
     if (!description) return;
 
-    const ticket = {
-        id: ticketIdCounter++,
-        description,
-        classification: 'classifying',
-        timestamp: new Date().toISOString()
-    };
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating...';
 
+    const classification = await classifyTicket(description);
+    
+    const response = await fetch('/api/tickets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description, classification })
+    });
+    
+    const ticket = await response.json();
     tickets.unshift(ticket);
     ticketInput.value = '';
     renderTickets();
-
-    const classification = await classifyTicket(description);
-    ticket.classification = classification;
-    renderTickets();
+    
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit Ticket';
 });
+
+async function loadTickets() {
+    try {
+        const response = await fetch('/api/tickets');
+        const data = await response.json();
+        tickets = data.tickets;
+        ticketIdCounter = data.counter;
+        renderTickets();
+    } catch (error) {
+        console.error('Error loading tickets:', error);
+    }
+}
 
 async function classifyTicket(description) {
     try {
@@ -125,14 +141,16 @@ function renderTickets() {
     }
 
     ticketsList.innerHTML = tickets.map(ticket => `
-        <div class="ticket">
+        <div class="ticket" data-ticket-id="${ticket.id}">
             <div class="ticket-header">
                 <span class="ticket-id">Ticket #${ticket.id}</span>
                 <span class="ticket-classification classification-${ticket.classification}">
                     ${ticket.classification.toUpperCase()}
                 </span>
             </div>
-            <div class="ticket-description">${escapeHtml(ticket.translatedText || ticket.description)}</div>
+            <div class="ticket-description" data-ticket-id="${ticket.id}">
+                ${escapeHtml(ticket.translatedText || ticket.description)}
+            </div>
             <div class="ticket-actions">
                 <select class="language-select" data-ticket-id="${ticket.id}">
                     <option value="">Translate to...</option>
@@ -148,6 +166,8 @@ function renderTickets() {
                     <option value="Arabic">Arabic</option>
                 </select>
                 ${ticket.translatedText ? `<button class="reset-btn" data-ticket-id="${ticket.id}">Show Original</button>` : ''}
+                <button class="edit-btn" data-ticket-id="${ticket.id}">✏️ Edit</button>
+                <button class="delete-btn" data-ticket-id="${ticket.id}">🗑️ Delete</button>
             </div>
         </div>
     `).join('');
@@ -159,6 +179,14 @@ function renderTickets() {
     document.querySelectorAll('.reset-btn').forEach(btn => {
         btn.addEventListener('click', handleReset);
     });
+
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', handleEdit);
+    });
+
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', handleDelete);
+    });
 }
 
 function escapeHtml(text) {
@@ -167,7 +195,7 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-renderTickets();
+loadTickets();
 
 
 async function handleTranslate(event) {
@@ -209,5 +237,78 @@ function handleReset(event) {
         delete ticket.translatedText;
         delete ticket.translatedLanguage;
         renderTickets();
+    }
+}
+
+
+function handleEdit(event) {
+    const ticketId = parseInt(event.target.dataset.ticketId);
+    const ticket = tickets.find(t => t.id === ticketId);
+    
+    if (!ticket) return;
+
+    const descriptionEl = document.querySelector(`.ticket-description[data-ticket-id="${ticketId}"]`);
+    const currentText = ticket.description;
+    
+    descriptionEl.innerHTML = `
+        <textarea class="edit-textarea" data-ticket-id="${ticketId}">${escapeHtml(currentText)}</textarea>
+        <div style="margin-top: 8px;">
+            <button class="save-btn" data-ticket-id="${ticketId}">💾 Save</button>
+            <button class="cancel-btn" data-ticket-id="${ticketId}">❌ Cancel</button>
+        </div>
+    `;
+
+    const textarea = descriptionEl.querySelector('.edit-textarea');
+    textarea.focus();
+    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+
+    descriptionEl.querySelector('.save-btn').addEventListener('click', async (e) => {
+        const newText = textarea.value.trim();
+        if (!newText) return;
+
+        e.target.disabled = true;
+        e.target.textContent = 'Saving...';
+
+        try {
+            const response = await fetch(`/api/tickets/${ticketId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ description: newText })
+            });
+
+            if (response.ok) {
+                ticket.description = newText;
+                delete ticket.translatedText;
+                delete ticket.translatedLanguage;
+                renderTickets();
+            }
+        } catch (error) {
+            console.error('Error updating ticket:', error);
+            alert('Failed to update ticket');
+        }
+    });
+
+    descriptionEl.querySelector('.cancel-btn').addEventListener('click', () => {
+        renderTickets();
+    });
+}
+
+async function handleDelete(event) {
+    const ticketId = parseInt(event.target.dataset.ticketId);
+    
+    if (!confirm('Are you sure you want to delete this ticket?')) return;
+
+    try {
+        const response = await fetch(`/api/tickets/${ticketId}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            tickets = tickets.filter(t => t.id !== ticketId);
+            renderTickets();
+        }
+    } catch (error) {
+        console.error('Error deleting ticket:', error);
+        alert('Failed to delete ticket');
     }
 }
