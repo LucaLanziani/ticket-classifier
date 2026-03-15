@@ -5,10 +5,41 @@ const ticketInput = document.getElementById('ticketInput');
 const submitBtn = document.getElementById('submitBtn');
 const voiceBtn = document.getElementById('voiceBtn');
 const ticketsList = document.getElementById('ticketsList');
+const logoutBtn = document.getElementById('logoutBtn');
+const userName = document.getElementById('userName');
+const userPhoto = document.getElementById('userPhoto');
 
 let mediaRecorder = null;
 let audioChunks = [];
 let isRecording = false;
+
+// Check authentication on load
+async function checkAuth() {
+    try {
+        const response = await fetch('/auth/user');
+        const data = await response.json();
+        
+        if (!data.authenticated) {
+            window.location.href = '/login.html';
+            return;
+        }
+        
+        userName.textContent = data.user.name;
+        if (data.user.photo) {
+            userPhoto.src = data.user.photo;
+            userPhoto.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Auth check failed:', error);
+        window.location.href = '/login.html';
+    }
+}
+
+logoutBtn.addEventListener('click', () => {
+    window.location.href = '/auth/logout';
+});
+
+checkAuth();
 
 voiceBtn.addEventListener('click', async () => {
     if (isRecording) {
