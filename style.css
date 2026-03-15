@@ -165,7 +165,7 @@ button {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     padding-bottom: 16px;
     border-bottom: 2px solid var(--gray-100);
 }
@@ -185,37 +185,101 @@ button {
     font-weight: 600;
 }
 
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 6px 14px;
+    border: 2px solid var(--gray-200);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    background: white;
+    color: var(--gray-600);
+    transition: all 0.2s;
+}
+
+.filter-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.filter-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+#sortSelect {
+    padding: 8px 12px;
+    border: 2px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    background: white;
+    color: var(--gray-700);
+    transition: border-color 0.2s;
+}
+
+#sortSelect:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
 .ticket {
-    background: var(--gray-50);
+    background: white;
     padding: 20px;
     border-radius: 12px;
-    margin-bottom: 16px;
     border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
     transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .ticket:hover {
     box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    transform: translateY(-3px);
 }
 
 .ticket-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
 }
 
 .ticket-id {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--gray-600);
-    font-weight: 600;
+    font-weight: 700;
+    font-family: monospace;
 }
 
 .ticket-classification {
-    padding: 6px 14px;
+    padding: 4px 12px;
     border-radius: 20px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -237,26 +301,41 @@ button {
 .ticket-description {
     color: var(--gray-800);
     line-height: 1.6;
-    margin-bottom: 14px;
-    font-size: 15px;
+    font-size: 14px;
+    flex: 1;
+}
+
+.ticket-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--gray-100);
+    flex-wrap: wrap;
+}
+
+.ticket-date {
+    font-size: 12px;
+    color: var(--gray-600);
 }
 
 .ticket-actions {
     display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
+    gap: 6px;
     align-items: center;
 }
 
 .language-select {
-    padding: 8px 12px;
+    padding: 6px 8px;
     border: 1px solid var(--gray-300);
     border-radius: 6px;
-    font-size: 13px;
+    font-size: 12px;
     cursor: pointer;
     background: white;
     color: var(--gray-700);
     transition: all 0.2s;
+    max-width: 110px;
 }
 
 .language-select:hover {
@@ -268,49 +347,32 @@ button {
     cursor: not-allowed;
 }
 
-.reset-btn, .edit-btn, .delete-btn {
-    padding: 8px 14px;
+.icon-btn {
+    padding: 6px 8px;
     border: none;
     border-radius: 6px;
-    font-size: 13px;
+    font-size: 14px;
     cursor: pointer;
-    font-weight: 600;
+    background: var(--gray-100);
     transition: all 0.2s;
+    line-height: 1;
 }
 
-.reset-btn {
-    background: var(--gray-600);
-    color: white;
-}
-
-.reset-btn:hover {
-    background: var(--gray-700);
-}
-
-.edit-btn {
-    background: var(--info);
-    color: white;
-}
-
-.edit-btn:hover {
-    background: #2563eb;
-}
-
-.delete-btn {
-    background: var(--danger);
-    color: white;
+.icon-btn:hover {
+    background: var(--gray-200);
+    transform: scale(1.1);
 }
 
 .delete-btn:hover {
-    background: var(--danger-hover);
+    background: #fee2e2;
 }
 
 .edit-textarea {
     width: 100%;
-    padding: 12px;
+    padding: 10px;
     border: 2px solid var(--gray-300);
     border-radius: 8px;
-    font-size: 15px;
+    font-size: 14px;
     font-family: inherit;
     resize: vertical;
     min-height: 80px;
@@ -323,12 +385,11 @@ button {
 }
 
 .save-btn, .cancel-btn {
-    padding: 8px 16px;
+    padding: 7px 14px;
     border: none;
     border-radius: 6px;
     font-size: 13px;
     cursor: pointer;
-    margin-right: 8px;
     font-weight: 600;
     transition: all 0.2s;
 }
@@ -338,48 +399,22 @@ button {
     color: white;
 }
 
-.save-btn:hover {
-    background: var(--success-hover);
-}
-
-.save-btn:disabled {
-    background: var(--gray-300);
-    cursor: not-allowed;
-}
+.save-btn:hover { background: var(--success-hover); }
+.save-btn:disabled { background: var(--gray-300); cursor: not-allowed; }
 
 .cancel-btn {
-    background: var(--gray-600);
-    color: white;
+    background: var(--gray-200);
+    color: var(--gray-700);
 }
 
-.cancel-btn:hover {
-    background: var(--gray-700);
-}
+.cancel-btn:hover { background: var(--gray-300); }
 
-#ticketsList p {
+.empty-state {
+    grid-column: 1 / -1;
     text-align: center;
     color: var(--gray-600);
-    padding: 40px 20px;
+    padding: 60px 20px;
     font-size: 15px;
-}
-
-@media (max-width: 640px) {
-    .app-header h1 {
-        font-size: 2rem;
-    }
-    
-    .button-group {
-        flex-direction: column;
-    }
-    
-    .ticket-actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .language-select, .reset-btn, .edit-btn, .delete-btn {
-        width: 100%;
-    }
 }
 
 
@@ -432,4 +467,11 @@ button {
     .user-menu {
         flex-direction: column;
     }
+}
+
+@media (max-width: 640px) {
+    .app-header h1 { font-size: 1.8rem; }
+    .button-group { flex-direction: column; }
+    .controls { flex-direction: column; align-items: stretch; }
+    .cards-grid { grid-template-columns: 1fr; }
 }

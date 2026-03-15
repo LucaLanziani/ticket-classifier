@@ -1,5 +1,7 @@
 let tickets = [];
 let ticketIdCounter = 1;
+let activeFilter = 'all';
+let activeSort = 'newest';
 
 const ticketInput = document.getElementById('ticketInput');
 const submitBtn = document.getElementById('submitBtn');
@@ -8,6 +10,22 @@ const ticketsList = document.getElementById('ticketsList');
 const logoutBtn = document.getElementById('logoutBtn');
 const userName = document.getElementById('userName');
 const userPhoto = document.getElementById('userPhoto');
+const sortSelect = document.getElementById('sortSelect');
+
+// Filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilter = btn.dataset.filter;
+        renderTickets();
+    });
+});
+
+sortSelect.addEventListener('change', () => {
+    activeSort = sortSelect.value;
+    renderTickets();
+});
 
 let mediaRecorder = null;
 let audioChunks = [];
@@ -167,17 +185,30 @@ async function classifyTicket(description) {
 
 function renderTickets() {
     const ticketCount = document.getElementById('ticketCount');
-    ticketCount.textContent = `${tickets.length} ticket${tickets.length !== 1 ? 's' : ''}`;
 
-    if (tickets.length === 0) {
-        ticketsList.innerHTML = '<p>No tickets yet. Create your first ticket above! 🎫</p>';
+    let filtered = activeFilter === 'all'
+        ? [...tickets]
+        : tickets.filter(t => t.classification === activeFilter);
+
+    if (activeSort === 'newest') {
+        filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    } else if (activeSort === 'oldest') {
+        filtered.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    } else if (activeSort === 'type') {
+        filtered.sort((a, b) => a.classification.localeCompare(b.classification));
+    }
+
+    ticketCount.textContent = `${filtered.length} of ${tickets.length} ticket${tickets.length !== 1 ? 's' : ''}`;
+
+    if (filtered.length === 0) {
+        ticketsList.innerHTML = '<p class="empty-state">No tickets found. Try a different filter or create a new ticket 🎫</p>';
         return;
     }
 
-    ticketsList.innerHTML = tickets.map(ticket => `
+    ticketsList.innerHTML = filtered.map(ticket => `
         <div class="ticket" data-ticket-id="${ticket.id}">
             <div class="ticket-header">
-                <span class="ticket-id">Ticket #${ticket.id}</span>
+                <span class="ticket-id">#${ticket.id}</span>
                 <span class="ticket-classification classification-${ticket.classification}">
                     ${ticket.classification.toUpperCase()}
                 </span>
@@ -185,42 +216,34 @@ function renderTickets() {
             <div class="ticket-description" data-ticket-id="${ticket.id}">
                 ${escapeHtml(ticket.translatedText || ticket.description)}
             </div>
-            <div class="ticket-actions">
-                <select class="language-select" data-ticket-id="${ticket.id}">
-                    <option value="">Translate to...</option>
-                    <option value="Spanish">Spanish</option>
-                    <option value="French">French</option>
-                    <option value="German">German</option>
-                    <option value="Italian">Italian</option>
-                    <option value="Portuguese">Portuguese</option>
-                    <option value="Japanese">Japanese</option>
-                    <option value="Chinese">Chinese</option>
-                    <option value="Korean">Korean</option>
-                    <option value="Russian">Russian</option>
-                    <option value="Arabic">Arabic</option>
-                </select>
-                ${ticket.translatedText ? `<button class="reset-btn" data-ticket-id="${ticket.id}">Show Original</button>` : ''}
-                <button class="edit-btn" data-ticket-id="${ticket.id}">✏️ Edit</button>
-                <button class="delete-btn" data-ticket-id="${ticket.id}">🗑️ Delete</button>
+            <div class="ticket-footer">
+                <span class="ticket-date">${new Date(ticket.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                <div class="ticket-actions">
+                    <select class="language-select" data-ticket-id="${ticket.id}">
+                        <option value="">🌐 Translate</option>
+                        <option value="Spanish">Spanish</option>
+                        <option value="French">French</option>
+                        <option value="German">German</option>
+                        <option value="Italian">Italian</option>
+                        <option value="Portuguese">Portuguese</option>
+                        <option value="Japanese">Japanese</option>
+                        <option value="Chinese">Chinese</option>
+                        <option value="Korean">Korean</option>
+                        <option value="Russian">Russian</option>
+                        <option value="Arabic">Arabic</option>
+                    </select>
+                    ${ticket.translatedText ? `<button class="icon-btn reset-btn" title="Show original" data-ticket-id="${ticket.id}">↩️</button>` : ''}
+                    <button class="icon-btn edit-btn" title="Edit" data-ticket-id="${ticket.id}">✏️</button>
+                    <button class="icon-btn delete-btn" title="Delete" data-ticket-id="${ticket.id}">🗑️</button>
+                </div>
             </div>
         </div>
     `).join('');
 
-    document.querySelectorAll('.language-select').forEach(select => {
-        select.addEventListener('change', handleTranslate);
-    });
-
-    document.querySelectorAll('.reset-btn').forEach(btn => {
-        btn.addEventListener('click', handleReset);
-    });
-
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', handleEdit);
-    });
-
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', handleDelete);
-    });
+    document.querySelectorAll('.language-select').forEach(s => s.addEventListener('change', handleTranslate));
+    document.querySelectorAll('.reset-btn').forEach(b => b.addEventListener('click', handleReset));
+    document.querySelectorAll('.edit-btn').forEach(b => b.addEventListener('click', handleEdit));
+    document.querySelectorAll('.delete-btn').forEach(b => b.addEventListener('click', handleDelete));
 }
 
 function escapeHtml(text) {

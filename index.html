@@ -36,7 +36,25 @@
                 <h2>All Tickets</h2>
                 <span id="ticketCount" class="ticket-count">0 tickets</span>
             </div>
-            <div id="ticketsList"></div>
+            <div class="controls">
+                <div class="filter-group">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="bug">Bug</button>
+                    <button class="filter-btn" data-filter="task">Task</button>
+                    <button class="filter-btn" data-filter="enhancement">Enhancement</button>
+                    <button class="filter-btn" data-filter="research">Research</button>
+                    <button class="filter-btn" data-filter="design">Design</button>
+                    <button class="filter-btn" data-filter="testing">Testing</button>
+                    <button class="filter-btn" data-filter="deployment">Deployment</button>
+                    <button class="filter-btn" data-filter="documentation">Docs</button>
+                </div>
+                <select id="sortSelect">
+                    <option value="newest">Newest first</option>
+                    <option value="oldest">Oldest first</option>
+                    <option value="type">By type</option>
+                </select>
+            </div>
+            <div id="ticketsList" class="cards-grid"></div>
         </div>
     </div>
 
